@@ -27,6 +27,51 @@
       ]
     }
   },
+  "agents": {
+    "defaults": {
+      "workspace": "USERPROFILE_PLACEHOLDER",
+      "models": {
+        "zai/glm-5": {
+          "alias": "GLM"
+        },
+        "zai/glm-4.5-flash": {
+          "alias": "GLM-Flash"
+        }
+      },
+      "model": {
+        "primary": "zai/glm-4.5-flash"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "zai": {
+        "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "glm-5",
+            "name": "GLM-5",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 1, "output": 3.2, "cacheRead": 0.2, "cacheWrite": 0 },
+            "contextWindow": 202800,
+            "maxTokens": 131100
+          },
+          {
+            "id": "glm-4.5-flash",
+            "name": "GLM-4.5 Flash",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 131072,
+            "maxTokens": 98304
+          }
+        ]
+      }
+    }
+  },
   "skills": {
     "entries": {
       "tavily": {

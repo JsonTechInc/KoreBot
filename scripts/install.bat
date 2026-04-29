@@ -3,23 +3,26 @@ chcp 65001 >nul
 cls
 title KoreBot + OpenClaw Auto Deploy Tool
 
-:: ==============================================
-:: Configuration
-:: ==============================================
+::: ==============================================
+::: Configuration (EDIT THIS)
+::: ==============================================
 set "SCRIPT_DIR=%~dp0"
 set "PROJECT_DIR=%SCRIPT_DIR%.."
 set "NODE_DIR=%SCRIPT_DIR%nodejs"
 set "NODE_EXE=%NODE_DIR%\node.exe"
 set "ZIP_FILE=%SCRIPT_DIR%nodejs.zip"
 set "GATEWAY_PORT=18789"
-set "PROJECT_CONFIG=%PROJECT_DIR%\openclaw.json"
 
-:: ==============================================
-:: Check and install Node.js
-:: ==============================================
-echo ==============================================
+::: PUT YOUR ZHIPU API KEY HERE
+set "ZHIPU_API_KEY=379fb6bd069b60bc4523759e43e990f7.EDRWe3mpilKMWvj1"
+
+::: ==============================================
+::: Check and install Node.js
+::: ==============================================
+echo.
+echo =============================================
 echo Checking Node.js...
-echo ==============================================
+echo =============================================
 
 if exist "%NODE_EXE%" (
     echo [OK] Node.js detected, checking version...
@@ -44,7 +47,6 @@ if not exist "%ZIP_FILE%" (
 echo [INFO] Extracting Node.js...
 powershell -NoProfile -Command "Expand-Archive -Path '%ZIP_FILE%' -DestinationPath '%SCRIPT_DIR%' -Force"
 if not exist "%NODE_DIR%\node.exe" (
-    :: Try alternative extraction path
     if exist "%SCRIPT_DIR%node-v22.14.0-win-x64" (
         ren "%SCRIPT_DIR%node-v22.14.0-win-x64" "nodejs"
     ) else (
@@ -57,40 +59,50 @@ if not exist "%NODE_DIR%\node.exe" (
 del "%ZIP_FILE%" >nul 2>&1
 
 :SET_PATH
-:: Use bundled Node.js
 set "PATH=%NODE_DIR%;%NODE_DIR%\node_modules\.bin;%APPDATA%\npm;%PATH%"
 
 echo [OK] Node.js ready:
 "%NODE_EXE%" -v
 echo.
 
-:: ==============================================
-:: Generate random token
-:: ==============================================
+::: ==============================================
+::: Generate random token
+::: ==============================================
 echo [INFO] Generating random gateway token...
 set "RANDOM_TOKEN=%random%%random%%random%%random%"
 set "TOKEN=auto-%RANDOM_TOKEN%"
 
-:: ==============================================
-:: Clean old installation (PRESERVE .openclaw)
-:: ==============================================
+::: ==============================================
+::: Check API Key
+::: ==============================================
+if "%ZHIPU_API_KEY%"=="your_api_key_here" (
+    echo [ERROR] Please edit install.bat and set your ZHIPU_API_KEY first!
+    echo You can get a key from: https://open.bigmodel.cn/
+    pause
+    exit /b 1
+)
+echo [INFO] API Key loaded (first 8 chars: %ZHIPU_API_KEY:~0,8%...)
+
+::: ==============================================
+::: Clean old installation (PRESERVE .openclaw)
+::: ==============================================
 echo.
-echo ==============================================
+echo =============================================
 echo Cleaning old OpenClaw installation...
-echo ==============================================
+echo =============================================
 call npm uninstall -g openclaw >nul 2>&1
 if exist "%APPDATA%\npm\node_modules\openclaw" (
     rmdir /s /q "%APPDATA%\npm\node_modules\openclaw" >nul 2>&1
 )
 call npm cache clean --force >nul 2>&1
 
-:: ==============================================
-:: Install OpenClaw
-:: ==============================================
+::: ==============================================
+::: Install OpenClaw
+::: ==============================================
 echo.
-echo ==============================================
+echo =============================================
 echo Installing OpenClaw@2026.3.31...
-echo ==============================================
+echo =============================================
 call npm install -g openclaw@2026.3.31 --registry=https://registry.npmmirror.com
 if errorlevel 1 (
     echo [ERROR] Installation failed
@@ -98,13 +110,13 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: ==============================================
-:: Create OpenClaw configuration
-:: ==============================================
+::: ==============================================
+::: Create OpenClaw configuration
+::: ==============================================
 echo [INFO] Creating OpenClaw configuration...
 mkdir "%USERPROFILE%\.openclaw" >nul 2>&1
 
-:: Copy openclaw.json from script directory to user directory
+::: Copy openclaw.json from script directory to user directory
 copy "%SCRIPT_DIR%openclaw.json" "%USERPROFILE%\.openclaw\openclaw.json" >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] Failed to copy openclaw.json
@@ -112,47 +124,67 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Replace token placeholder with generated token
-powershell -NoProfile -Command "(Get-Content '%USERPROFILE%\.openclaw\openclaw.json') -replace 'auto-demo-token', '%TOKEN%' | Set-Content '%USERPROFILE%\.openclaw\openclaw.json'"
-echo [INFO] Updated openclaw.json with gateway token
+::: Replace token and userprofile placeholders
+powershell -NoProfile -Command "(Get-Content '%USERPROFILE%\.openclaw\openclaw.json') -replace 'auto-demo-token', '%TOKEN%' -replace 'USERPROFILE_PLACEHOLDER', '%USERPROFILE%\.openclaw\workspace' | Set-Content '%USERPROFILE%\.openclaw\openclaw.json' -Encoding UTF8"
+echo [INFO] Updated openclaw.json with gateway token and workspace path
 
-:: Create agent auth config directory
-mkdir "%USERPROFILE%\.openclaw\agents\main" >nul 2>&1
+::: Create agent config directory
+mkdir "%USERPROFILE%\.openclaw\agents\main\agent" >nul 2>&1
 
-:: ==============================================
-:: Show info
-:: ==============================================
+::: Create agent.json
+if not exist "%USERPROFILE%\.openclaw\agents\main\agent\agent.json" (
+    echo [INFO] Creating agent.json...
+    powershell -NoProfile -Command "[System.IO.File]::WriteAllText('%USERPROFILE%\.openclaw\agents\main\agent\agent.json', '{\"version\":1,\"model\":{\"provider\":\"zai\",\"model\":\"glm-4.5-flash\"}}', [System.Text.Encoding]::UTF8)"
+)
+
+::: Create models.json
+if not exist "%USERPROFILE%\.openclaw\agents\main\agent\models.json" (
+    echo [INFO] Creating models.json...
+    powershell -NoProfile -Command "[System.IO.File]::WriteAllText('%USERPROFILE%\.openclaw\agents\main\agent\models.json', '{\"providers\":{\"zai\":{\"baseUrl\":\"https://open.bigmodel.cn/api/paas/v4\",\"api\":\"openai-completions\",\"models\":[{\"id\":\"glm-4.5-flash\",\"name\":\"GLM-4.5 Flash\",\"reasoning\":true,\"input\":[\"text\"],\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0},\"contextWindow\":131072,\"maxTokens\":98304,\"api\":\"openai-completions\"},{\"id\":\"glm-5\",\"name\":\"GLM-5\",\"reasoning\":true,\"input\":[\"text\"],\"cost\":{\"input\":1,\"output\":3.2,\"cacheRead\":0.2,\"cacheWrite\":0},\"contextWindow\":202800,\"maxTokens\":131100,\"api\":\"openai-completions\"}]}}}', [System.Text.Encoding]::UTF8)"
+)
+
+::: Create auth-profiles.json
+echo [INFO] Creating auth-profiles.json...
+if exist "%USERPROFILE%\.openclaw\agents\main\agent\auth-profiles.json" (
+    echo [INFO] Found existing auth-profiles.json, skipping...
+) else (
+    powershell -NoProfile -Command "[System.IO.File]::WriteAllText('%USERPROFILE%\.openclaw\agents\main\agent\auth-profiles.json', '{\"version\":1,\"profiles\":{\"zai:default\":{\"type\":\"api_key\",\"provider\":\"zai\",\"key\":\"%ZHIPU_API_KEY%\"}},\"lastGood\":{\"zai\":\"zai:default\"},\"usageStats\":{\"zai:default\":{\"errorCount\":0,\"lastUsed\":0}}}', [System.Text.Encoding]::UTF8)"
+)
+
+::: ==============================================
+::: Show info
+::: ==============================================
 echo.
-echo ==============================================
+echo =============================================
 echo Deployment Complete!
-echo ==============================================
+echo =============================================
 echo GATEWAY TOKEN: %TOKEN%
 echo DASHBOARD URL: http://localhost:%GATEWAY_PORT%/dashboard?token=%TOKEN%
 echo CHAT URL: http://localhost:%GATEWAY_PORT%/chat
-echo ==============================================
+echo =============================================
 echo.
 
-:: ==============================================
-:: Start gateway
-:: ==============================================
+::: ==============================================
+::: Start gateway
+::: ==============================================
 echo [INFO] Starting gateway...
 call openclaw gateway install --force >nul 2>&1
 
-:: Kill old node processes (without killing this script)
-taskkill /f /im node.exe /fi "windowtitle ne %~nx0" >nul 2>&1
+::: Kill old node processes
+taskkill /f /im node.exe >nul 2>&1
 timeout /t 1 /nobreak >nul
 
-:: Start gateway in background
+::: Start gateway in background
 start /B cmd /c "openclaw gateway --port=%GATEWAY_PORT% --allow-unconfigured >nul 2>&1"
 timeout /t 3 /nobreak >nul
 
-:: ==============================================
-:: Start KoreBot
-:: ==============================================
+::: ==============================================
+::: Start KoreBot
+::: ==============================================
 echo.
-echo ==============================================
+echo =============================================
 echo Starting KoreBot...
-echo ==============================================
+echo =============================================
 cd /d "%PROJECT_DIR%"
 if not exist "package.json" (
     echo [ERROR] package.json not found in project directory

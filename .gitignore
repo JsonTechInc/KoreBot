@@ -1,0 +1,10 @@
+# 忽略用户私密配置（包含 API Key）
+scripts/config.json
+
+# 忽略运行时目录（Node.js + OpenClaw 全局包）
+# 安装到 %USERPROFILE%\.korebot\，由 install.bat 自动管理
+# 如需重新安装，删除此目录后重跑 install.bat 即可
+%USERPROFILE%\.korebot\
+
+# 忽略 scripts/nodejs/ 目录（包含 Node.js 可执行文件和相关工具）
+scripts/nodejs/
