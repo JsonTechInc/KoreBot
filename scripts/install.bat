@@ -143,13 +143,10 @@ if not exist "%USERPROFILE%\.openclaw\agents\main\agent\models.json" (
     powershell -NoProfile -Command "[System.IO.File]::WriteAllText('%USERPROFILE%\.openclaw\agents\main\agent\models.json', '{\"providers\":{\"zai\":{\"baseUrl\":\"https://open.bigmodel.cn/api/paas/v4\",\"api\":\"openai-completions\",\"models\":[{\"id\":\"glm-4.5-flash\",\"name\":\"GLM-4.5 Flash\",\"reasoning\":true,\"input\":[\"text\"],\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0},\"contextWindow\":131072,\"maxTokens\":98304,\"api\":\"openai-completions\"},{\"id\":\"glm-5\",\"name\":\"GLM-5\",\"reasoning\":true,\"input\":[\"text\"],\"cost\":{\"input\":1,\"output\":3.2,\"cacheRead\":0.2,\"cacheWrite\":0},\"contextWindow\":202800,\"maxTokens\":131100,\"api\":\"openai-completions\"}]}}}', [System.Text.Encoding]::UTF8)"
 )
 
-::: Create auth-profiles.json
+::: Create auth-profiles.json (force overwrite to ensure correct content)
 echo [INFO] Creating auth-profiles.json...
-if exist "%USERPROFILE%\.openclaw\agents\main\agent\auth-profiles.json" (
-    echo [INFO] Found existing auth-profiles.json, skipping...
-) else (
-    powershell -NoProfile -Command "[System.IO.File]::WriteAllText('%USERPROFILE%\.openclaw\agents\main\agent\auth-profiles.json', '{\"version\":1,\"profiles\":{\"zai:default\":{\"type\":\"api_key\",\"provider\":\"zai\",\"key\":\"%ZHIPU_API_KEY%\"}},\"lastGood\":{\"zai\":\"zai:default\"},\"usageStats\":{\"zai:default\":{\"errorCount\":0,\"lastUsed\":0}}}', [System.Text.Encoding]::UTF8)"
-)
+powershell -NoProfile -Command "[System.IO.File]::WriteAllText('%USERPROFILE%\.openclaw\agents\main\agent\auth-profiles.json', '{\"version\":1,\"profiles\":{\"zai:default\":{\"type\":\"api_key\",\"provider\":\"zai\",\"key\":\"%ZHIPU_API_KEY%\"}},\"lastGood\":{\"zai\":\"zai:default\"},\"usageStats\":{\"zai:default\":{\"errorCount\":0,\"lastUsed\":0}}}', [System.Text.Encoding]::UTF8)"
+echo [OK] auth-profiles.json created
 
 ::: ==============================================
 ::: Show info
