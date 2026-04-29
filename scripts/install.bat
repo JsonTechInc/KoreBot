@@ -124,8 +124,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-::: Replace token and userprofile placeholders (double-escape backslashes for JSON)
-powershell -NoProfile -Command "(Get-Content '%USERPROFILE%\.openclaw\openclaw.json') -replace 'auto-demo-token', '%TOKEN%' -replace 'USERPROFILE_PLACEHOLDER', ('%USERPROFILE%' -replace '\\\\', '\\\\\\\\') + '\\.openclaw\\workspace' | Set-Content '%USERPROFILE%\.openclaw\openclaw.json' -Encoding UTF8"
+::: Replace token and userprofile placeholders (use semicolons to chain replacements)
+powershell -NoProfile -Command "$up='%USERPROFILE%' -replace '\\\\', '\\\\\\\\'; $c=Get-Content '%USERPROFILE%\.openclaw\openclaw.json' -Raw; $c=$c -replace 'auto-demo-token','%TOKEN%'; $c=$c -replace 'USERPROFILE_PLACEHOLDER',($up+'\\.openclaw\\workspace'); Set-Content '%USERPROFILE%\.openclaw\openclaw.json' -Value $c -Encoding UTF8"
 echo [INFO] Updated openclaw.json with gateway token and workspace path
 
 ::: Create agent config directory
