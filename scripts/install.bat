@@ -125,7 +125,7 @@ if errorlevel 1 (
 )
 
 ::: Replace token and userprofile placeholders (use semicolons to chain replacements)
-powershell -NoProfile -Command "$up='%USERPROFILE%' -replace '\\\\', '\\\\\\\\'; $c=Get-Content '%USERPROFILE%\.openclaw\openclaw.json' -Raw; $c=$c -replace 'auto-demo-token','%TOKEN%'; $c=$c -replace 'USERPROFILE_PLACEHOLDER',($up+'\\.openclaw\\workspace'); Set-Content '%USERPROFILE%\.openclaw\openclaw.json' -Value $c -Encoding UTF8"
+powershell -NoProfile -Command "$up='%USERPROFILE%' -replace '\\', '\\'; $c=Get-Content '%USERPROFILE%\.openclaw\openclaw.json' -Raw; $c=$c -replace 'auto-demo-token','%TOKEN%'; $c=$c -replace 'USERPROFILE_PLACEHOLDER',($up+'\\.openclaw\\workspace'); Set-Content '%USERPROFILE%\.openclaw\openclaw.json' -Value $c -Encoding UTF8"
 echo [INFO] Updated openclaw.json with gateway token and workspace path
 
 ::: Create agent config directory
@@ -147,6 +147,13 @@ if not exist "%USERPROFILE%\.openclaw\agents\main\agent\models.json" (
 echo [INFO] Creating auth-profiles.json...
 powershell -NoProfile -Command "[System.IO.File]::WriteAllText('%USERPROFILE%\.openclaw\agents\main\agent\auth-profiles.json', '{\"version\":1,\"profiles\":{\"zai:default\":{\"type\":\"api_key\",\"provider\":\"zai\",\"key\":\"%ZHIPU_API_KEY%\"}},\"lastGood\":{\"zai\":\"zai:default\"},\"usageStats\":{\"zai:default\":{\"errorCount\":0,\"lastUsed\":0}}}', [System.Text.Encoding]::UTF8)"
 echo [OK] auth-profiles.json created
+
+::: ==============================================
+::: Add node and openclaw to user PATH
+::: ==============================================
+echo [INFO] Adding node and openclaw to user PATH...
+powershell -NoProfile -Command "$nodeDir='%SCRIPT_DIR%nodejs'; $npmDir='%APPDATA%\npm'; $path=[Environment]::GetEnvironmentVariable('PATH','User'); if(-not $path.Contains($nodeDir)){[Environment]::SetEnvironmentVariable('PATH', $nodeDir + ';' + $npmDir + ';' + $path, 'User')}; Write-Host 'PATH updated'"
+echo [OK] Environment variables updated. Please restart your terminal for changes to take effect.
 
 ::: ==============================================
 ::: Show info
