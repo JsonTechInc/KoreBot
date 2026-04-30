@@ -128,6 +128,10 @@ if errorlevel 1 (
 powershell -NoProfile -Command "$up='%USERPROFILE%' -replace '\\', '\\'; $c=Get-Content '%USERPROFILE%\.openclaw\openclaw.json' -Raw; $c=$c -replace 'auto-demo-token','%TOKEN%'; $c=$c -replace 'USERPROFILE_PLACEHOLDER',($up+'\\.openclaw\\workspace'); Set-Content '%USERPROFILE%\.openclaw\openclaw.json' -Value $c -Encoding UTF8"
 echo [INFO] Updated openclaw.json with gateway token and workspace path
 
+:::: Create workspace directory (required by OpenClaw, missing dir causes Internal Server Error)
+mkdir "%USERPROFILE%\.openclaw\workspace" >nul 2>&1
+echo [INFO] Workspace directory ready: %USERPROFILE%\.openclaw\workspace
+
 ::: Create agent config directory
 mkdir "%USERPROFILE%\.openclaw\agents\main\agent" >nul 2>&1
 
