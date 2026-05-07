@@ -49,6 +49,7 @@
       "zai": {
         "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
         "api": "openai-completions",
+        "apiKey": "ZHIPU_API_KEY_PLACEHOLDER",
         "models": [
           {
             "id": "glm-5",

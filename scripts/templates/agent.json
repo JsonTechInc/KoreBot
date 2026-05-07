@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "model": {
+    "provider": "zai",
+    "model": "glm-4.5-flash"
+  }
+}

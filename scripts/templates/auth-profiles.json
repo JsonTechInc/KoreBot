@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "profiles": {
+    "zai:default": {
+      "type": "api_key",
+      "provider": "zai",
+      "key": "ZHIPU_API_KEY_PLACEHOLDER"
+    }
+  },
+  "lastGood": {
+    "zai": "zai:default"
+  },
+  "usageStats": {
+    "zai:default": {
+      "errorCount": 0,
+      "lastUsed": 0
+    }
+  }
+}
